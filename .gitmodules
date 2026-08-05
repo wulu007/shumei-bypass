@@ -1,0 +1,6 @@
+[submodule "extensions/shumei-bypass-icon"]
+	path = extensions/shumei-bypass-icon
+	url = git@github.com:wulu007/shumei-bypass-icon.git
+[submodule "extensions/shumei-bypass-seq"]
+	path = extensions/shumei-bypass-seq
+	url = git@github.com:wulu007/shumei-bypass-seq.git
