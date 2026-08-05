@@ -76,7 +76,7 @@ from wulu_shumei_bypass import Shumei
 
 async def main():
     s = Shumei(organization='your-organization-id', mode='icon_select')
-    reg = await s.register()          # -> RegisterResult (rid, bg, fg, ...)
+    reg = await s.register()  # -> RegisterResult (rid, bg, fg, ...)
     bg = await s.fetch_img(reg['bg'])  # raw bytes of background image
     fg = await s.fetch_img(reg['fg'])  # raw bytes of foreground image
 

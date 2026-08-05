@@ -76,7 +76,7 @@ from wulu_shumei_bypass import Shumei
 
 async def main():
     s = Shumei(organization='你的-organization-id', mode='icon_select')
-    reg = await s.register()          # -> RegisterResult (rid, bg, fg, ...)
+    reg = await s.register()  # -> RegisterResult (rid, bg, fg, ...)
     bg = await s.fetch_img(reg['bg'])  # 背景图原始字节
     fg = await s.fetch_img(reg['fg'])  # 前景图原始字节
 
