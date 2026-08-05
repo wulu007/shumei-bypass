@@ -35,11 +35,18 @@ jobs:
         run: |
           set -eo pipefail
           echo "Updating Python Config..."
-          curl -sL -H "Accept: application/vnd.github.v3.raw" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/wulu007/scripts/contents/shumei/hook.js?ref=master" \
-            | node | while IFS='=' read -r key value; do
-            sg run -l python -p "$key = \$OLD" -r "$key = $value" -i src/wulu_shumei_bypass/config.py -U
+          NODE_OUTPUT="$(
+            curl -sL -H "Accept: application/vnd.github.v3.raw" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/wulu007/scripts/contents/shumei/hook.js?ref=master" \
+              | node
+          )"
+          echo "=== node output ==="
+          echo "$NODE_OUTPUT"
+          echo "==================="
+          echo "$NODE_OUTPUT" | while IFS='=' read -r key value; do
+            echo ">> applying $key = $value"
+            ast-grep run -l python -p "$key = \$OLD" -r "$key = $value" -i src/wulu_shumei_bypass/config.py -U
             if [ "$key" == "protocol" ]; then
               echo "SHUMEI_VERSION=$value" >> $GITHUB_ENV
             fi
@@ -49,7 +56,7 @@ jobs:
         id: bump
         run: |
           set -eo pipefail
-          if git diff --quiet src/wulu_geetest_bypass/config.py; then
+          if git diff --quiet src/wulu_shumei_bypass/config.py; then
             echo "No changes detected in config.py"
           else
             echo "Changes detected, bumping version"
