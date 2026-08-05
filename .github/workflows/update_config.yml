@@ -1,0 +1,67 @@
+name: Update Config
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      
+      - name: Install ast-grep
+        run: npm i @ast-grep/cli -g
+
+      - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          python-version: "3.11"
+        
+      - name: Update config.py
+        id: update
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          set -eo pipefail
+          echo "Updating Python Config..."
+          curl -sL -H "Accept: application/vnd.github.v3.raw" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/wulu007/scripts/contents/shumei/hook.js?ref=master" \
+            | node | while IFS='=' read -r key value; do
+            sg run -l python -p "$key = \$OLD" -r "$key = $value" -i src/wulu_shumei_bypass/config.py -U
+            if [ "$key" == "protocol" ]; then
+              echo "SHUMEI_VERSION=$value" >> $GITHUB_ENV
+            fi
+          done
+
+      - name: Check and bump version if changed
+        id: bump
+        run: |
+          set -eo pipefail
+          if git diff --quiet src/wulu_geetest_bypass/config.py; then
+            echo "No changes detected in config.py"
+          else
+            echo "Changes detected, bumping version"
+            uv version --bump patch
+            echo "version=$(uv version --short)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update shumei config to ${{ env.SHUMEI_VERSION }} [auto]"
+          file_pattern: 'src/wulu_shumei_bypass/config.py pyproject.toml'
+          commit_user_name: 'bot'
+          commit_user_email: 'dabaobeix@gmail.com'
+          tagging_message: 'v${{ steps.bump.outputs.version }}' 

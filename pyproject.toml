@@ -1,0 +1,67 @@
+[project]
+name = "wulu-shumei-bypass"
+version = "0.1.0"
+description = "A Python framework for interacting with Shumei (数美) CAPTCHA service — registration, image fetching, encryption, and verification."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["pycryptodome>=3.23.0", "wreq>=0.12.0"]
+license = { text = "MIT" }
+authors = [{ name = "wulu007", email = "dabaobeix@gmail.com" }]
+keywords = [
+    "shumei",
+    "bypass",
+    "captcha",
+    "reverse-engineering",
+    'web-reverse',
+    "des",
+    'crack',
+    'slide',
+]
+
+[project.optional-dependencies]
+all = ["wulu-shumei-bypass[cv]"]
+cv = ["opencv-python-headless>=4.10.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.urls]
+Homepage = "https://github.com/wulu007/shumei-bypass"
+Documentation = "https://github.com/wulu007/shumei-bypass#readme"
+Repository = "https://github.com/wulu007/shumei-bypass.git"
+Issues = "https://github.com/wulu007/shumei-bypass/issues"
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wulu_shumei_bypass"]
+exclude = ["*.png", "*.jpg", "tests/", "scripts/"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ['I']
+fixable = ['I']
+
+[tool.ruff.lint.isort]
+force-single-line = false
+relative-imports-order = "closest-to-furthest"
+split-on-trailing-comma = true
+
+[tool.pytest.ini_options]
+addopts = "-s"
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.0",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.17",
+    "pillow>=12.3.0",
+    "wulu-shumei-bypass[cv]",
+]
