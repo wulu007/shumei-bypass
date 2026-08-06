@@ -25,7 +25,7 @@ jobs:
 
       - uses: astral-sh/setup-uv@v8.1.0
         with:
-          enable-cache: true
+          enable-cache: false
           python-version: "3.11"
         
       - name: Update config.py
