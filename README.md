@@ -2,9 +2,9 @@
 
 <p align="center">
 <a href="https://pypi.org/project/wulu-shumei-bypass/"><img alt="PyPI" src="https://img.shields.io/pypi/v/wulu-shumei-bypass.svg"></a>
-<a href="https://pypi.org/project/wulu-shumei-bypass/"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/wulu-shumei-bypass"></a>
+<a href="https://pypi.org/project/wulu-shumei-bypass/"><img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-blue"></a>
 <a href="https://github.com/wulu007/shumei-bypass/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/wulu007/shumei-bypass"></a>
-<a href="https://github.com/wulu007/shumei-bypass"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/wulu007/shumei-bypass"></a>
+<a href="https://github.com/wulu007/shumei-bypass/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/wulu007/shumei-bypass/deploy.yml?label=CI"></a>
 </p>
 
 <p align="center">
@@ -26,9 +26,9 @@ The framework itself is fully open-source. Reverse-engineered solvers for specif
 ## Installation
 
 ```bash
-uv add wulu-shumei-bypass
+uv add "wulu-shumei-bypass[all]"
 # or
-pip install wulu-shumei-bypass
+pip install "wulu-shumei-bypass[all]"
 ```
 
 ### Optional extras

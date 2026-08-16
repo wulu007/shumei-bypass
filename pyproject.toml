@@ -4,6 +4,13 @@ version = "0.1.0"
 description = "A Python framework for interacting with Shumei (数美) CAPTCHA service — registration, image fetching, encryption, and verification."
 readme = "README.md"
 requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 dependencies = ["pycryptodome>=3.23.0", "wreq>=0.12.0"]
 license = { text = "MIT" }
 authors = [{ name = "wulu007", email = "dabaobeix@gmail.com" }]
