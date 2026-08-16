@@ -45,8 +45,7 @@ quote-style = "single"
 indent-style = "space"
 
 [tool.ruff.lint]
-select = ['I']
-fixable = ['I']
+fixable = ['ALL']
 
 [tool.ruff.lint.isort]
 force-single-line = false

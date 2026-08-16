@@ -4,7 +4,9 @@ from Crypto.Cipher import DES
 
 from .config import CryptoConfig
 
-_ZPAD = lambda d, s: d + b'\x00' * (-len(d) % s)
+
+def _ZPAD(d: bytes, s: int) -> bytes:
+    return d + b'\x00' * (-len(d) % s)
 
 
 def encrypt_field(key: str, data: bytes) -> str:

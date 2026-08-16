@@ -1,12 +1,20 @@
 import json
 import random
 import time
-from typing import Any
+from typing import Any, ClassVar
 
 from typing_extensions import Unpack
 from wreq import Client
 
-from wulu_shumei_bypass._type import Mode, RegisterResult, ShumeiParams, VerifyResult
+from wulu_shumei_bypass._type import (
+    InvalidOrganizationError,
+    Mode,
+    RegisterError,
+    RegisterResult,
+    ShumeiParams,
+    SolveError,
+    VerifyResult,
+)
 from wulu_shumei_bypass.slover import (
     solve_icon,
     solve_select,
@@ -20,20 +28,27 @@ from ._type import SolverMapping
 from .config import CryptoConfig
 from .sign import encrypt_field as _encrypt
 
-_JSON = lambda v: json.dumps(v, separators=(',', ':'))
-_parse_jsonp = lambda t: (
-    json.loads(t.strip()[t.strip().index('(') + 1 : -1])
-    if t.strip().endswith(')')
-    else json.loads(t.strip())
-)
-get_time = lambda: int(time.time() * 1000)
+
+def _JSON(v) -> str:
+    return json.dumps(v, separators=(',', ':'))
+
+
+def _parse_jsonp(t: str):
+    stripped = t.strip()
+    if stripped.endswith(')'):
+        return json.loads(stripped[stripped.index('(') + 1 : -1])
+    return json.loads(stripped)
+
+
+def get_time() -> int:
+    return int(time.time() * 1000)
 
 
 class Shumei:
     BASE_URL = 'https://captcha.fengkongcloud.com'
     STATIC_URL = 'https://castatic.fengkongcloud.cn'
 
-    _solver: SolverMapping = {
+    _solver: ClassVar[SolverMapping] = {
         'slide': solve_slide,
         'spatial_select': solve_spatial_select,
         'icon_select': solve_icon,
@@ -43,6 +58,12 @@ class Shumei:
     }
 
     def __init__(self, **kwargs: Unpack[ShumeiParams]):
+        """初始化验证码客户端。
+
+        Args:
+            **kwargs: 参数见 :class:`~wulu_shumei_bypass._type.ShumeiParams`。
+                必填 ``organization``；``mode`` 默认 ``'slide'``。
+        """
         self.organization = kwargs['organization']
         self.app_id = kwargs.get('app_id', 'default')
         self.channel = kwargs.get('channel', 'default')
@@ -77,6 +98,15 @@ class Shumei:
         return ts + cs
 
     async def register(self) -> RegisterResult:
+        """注册一次验证码请求，获取验证码图片与答题所需信息。
+
+        Returns:
+            注册详情（含 ``rid``、``bg`` 等字段）。
+
+        Raises:
+            InvalidOrganizationError: organization 无效或服务不可用（code 9101）。
+            RegisterError: 注册失败（非 1100 的其他响应）。
+        """
         params: dict[str, str] = {
             'organization': self.organization,
             'appId': self.app_id,
@@ -92,12 +122,25 @@ class Shumei:
         if isinstance(resp, dict) and resp.get('code') == 1100:
             return resp.get('detail')  # type: ignore
 
-        raise Exception(f'Register failed: {resp}')
+        if isinstance(resp, dict) and resp.get('code') == 9101:
+            raise InvalidOrganizationError(f'Register failed: {resp}')
+
+        raise RegisterError(f'Register failed: {resp}')
 
     async def fetch_img(self, path: str):
         return await (await self._http.get(f'{self.STATIC_URL}{path}')).bytes()
 
     async def fverify(self, rr: RegisterResult, *, true_width=300) -> VerifyResult:
+        """对一次注册结果提交验证答案。
+
+        Args:
+            rr: :meth:`register` 的返回值。
+            true_width: 题目区域的真实宽度（像素），默认 300。
+
+        Returns:
+            验证结果，``code == 1100`` 表示提交成功，
+            ``riskLevel == 'PASS'`` 表示通过。
+        """
         et = now = get_time()
         if self.mode in ('select', 'icon_select', 'seq_select'):
             st = now - random.randint(3000, 8000)  # 点选需要读题时间
@@ -159,27 +202,50 @@ class Shumei:
             raise NotImplementedError(f'unsupported mode: {self.mode}')
 
         if self.mode in ('select', 'icon_select', 'seq_select'):
-            ts = times(st, et, len(pos))
-            data = [[*p, t] for p, t in zip(pos, ts)]
+            ts = times(st, et, len(pos))  # type: ignore
+            data = [[*p, t] for p, t in zip(pos, ts)]  # type: ignore
             body |= enc('selectData', data)
             body |= enc('mouseData', data)
             body |= enc('duration', ts[-1] - st)
 
         return await self._get('/ca/v2/fverify', body)
 
-    async def solve(self, retry: int = 3) -> VerifyResult:
+    async def solve(self, retry: int = 3) -> str:
+        """注册 → 解题 → 验证，直到通过或重试耗尽。
+
+        Args:
+            retry: 最多尝试次数，默认 3。
+
+        Returns:
+            通过验证的 ``captcha_uuid``。
+
+        Raises:
+            SolveError: 尝试 ``retry`` 次后仍未通过。
+        """
         for _ in range(retry):
             reg = await self.register()
             verify_res = await self.fverify(rr=reg)
             if verify_res['code'] != 1100:
-                raise Exception(f'Verify failed: {verify_res}')
+                raise SolveError(f'Verify failed: {verify_res}')
             if verify_res.get('riskLevel') == 'PASS':
-                return verify_res
+                return self.captcha_uuid
 
-        raise Exception(f'All attempts failed: last verify result: {verify_res}')
+        raise SolveError(f'All attempts failed: last verify result: {verify_res}')  # type: ignore
 
     @classmethod
     def add_solver(cls, mode: Mode):
+        """注册自定义 solver。
+
+        用法::
+
+            @Shumei.add_solver('my_mode')
+            def solve_my_mode(bg: bytes, ...):
+                ...
+
+        Args:
+            mode: 新模式名，需预先加入 :data:`~wulu_shumei_bypass._type.Mode`。
+        """
+
         def decorator(func):
             cls._solver[mode] = func  # type: ignore
             return func

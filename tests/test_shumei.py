@@ -3,7 +3,7 @@ import pytest
 from wulu_shumei_bypass.shumei import Shumei
 from wulu_shumei_bypass.trajectory import generate
 
-mode = ['auto_slide', 'slide', 'spatial_select']
+mode = ['auto_slide', 'slide', 'spatial_select', 'icon_select', 'seq_select', 'select']
 org = [
     'd6tpAY1oV0Kv5jRSgxQr',
     'xQsKB7v2qSFLFxnvmjdO',
@@ -23,7 +23,7 @@ async def test_shumei(mode, org):
         assert result.get('riskLevel') == 'PASS', (
             f'Expected PASS, got {result.get("riskLevel")}'
         )
-    except NotImplementedError as e:
+    except ImportError as e:
         pytest.skip(reason=str(e))
 
 

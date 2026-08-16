@@ -1,16 +1,17 @@
 import importlib
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 __all__ = [
+    'solve_icon',
+    'solve_select',
+    'solve_seq_select',
     'solve_slide',
     'solve_spatial_select',
-    'solve_icon',
-    'solve_seq_select',
-    'solve_select',
 ]
 
 # 通过 entry points 分发的私有 solver（由私有扩展包注册）
-_PRIVATE_SOLVERS = {'solve_icon', 'solve_seq_select'}
+_PRIVATE_SOLVERS = {'solve_icon', 'solve_seq_select', 'solve_select'}
 _PRIVATE_EP_GROUP = 'wulu_shumei_bypass.solvers'
 
 
@@ -29,7 +30,7 @@ def _discover_private() -> dict[str, Callable]:
         from importlib.metadata import entry_points
 
         eps = entry_points(group=_PRIVATE_EP_GROUP)
-    except Exception:
+    except (OSError, TypeError, ValueError):
         return {}
     return {ep.name: ep.load() for ep in eps}
 

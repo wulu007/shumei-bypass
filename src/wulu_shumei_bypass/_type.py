@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from typing import (
     Any,
-    Callable,
     Literal,
     NotRequired,
     Required,
@@ -64,5 +64,10 @@ class SolverMapping(TypedDict, total=False):
     spatial_select: Callable[[bytes, str], tuple[float, float]]
 
 
-class InvalidOrganizationError(Exception):
-    pass
+class InvalidOrganizationError(Exception): ...
+
+
+class RegisterError(Exception): ...
+
+
+class SolveError(Exception): ...
