@@ -6,6 +6,14 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 
+[manifest]
+members = [
+    "shumei-bypass-select",
+    "wulu-shumei-bypass",
+    "wulu-shumei-bypass-icon",
+    "wulu-shumei-bypass-seq",
+]
+
 [[package]]
 name = "colorama"
 version = "0.4.6"
@@ -377,6 +385,11 @@ wheels = [
 ]
 
 [[package]]
+name = "shumei-bypass-select"
+version = "0.1.0"
+source = { editable = "extensions/shumei-bypass-select" }
+
+[[package]]
 name = "typing-extensions"
 version = "4.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -423,7 +436,7 @@ wheels = [
 
 [[package]]
 name = "wulu-shumei-bypass"
-version = "0.1.0"
+version = "0.1.4"
 source = { editable = "." }
 dependencies = [
     { name = "pycryptodome" },
@@ -464,3 +477,13 @@ dev = [
     { name = "ruff", specifier = ">=0.15.17" },
     { name = "wulu-shumei-bypass", extras = ["cv"] },
 ]
+
+[[package]]
+name = "wulu-shumei-bypass-icon"
+version = "0.1.0"
+source = { editable = "extensions/shumei-bypass-icon" }
+
+[[package]]
+name = "wulu-shumei-bypass-seq"
+version = "0.1.0"
+source = { editable = "extensions/shumei-bypass-seq" }
