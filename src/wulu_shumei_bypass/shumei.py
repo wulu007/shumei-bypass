@@ -224,11 +224,12 @@ class Shumei:
         """
         for _ in range(retry):
             reg = await self.register()
+            rid = reg['rid']
             verify_res = await self.fverify(rr=reg)
             if verify_res['code'] != 1100:
                 raise SolveError(f'Verify failed: {verify_res}')
             if verify_res.get('riskLevel') == 'PASS':
-                return self.captcha_uuid
+                return rid
 
         raise SolveError(f'All attempts failed: last verify result: {verify_res}')  # type: ignore
 
